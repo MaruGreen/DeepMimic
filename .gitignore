@@ -17,7 +17,7 @@
 *.cxx
 *.so
 
-
+.idea
 .vs/
 __pycache__/
 output/
