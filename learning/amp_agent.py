@@ -161,13 +161,13 @@ class AMPAgent(PPOAgent):
         self._acc_expert_tf = tf.reduce_mean(tf.cast(tf.greater(self._disc_logits_expert_tf, 0), tf.float32))
         self._acc_agent_tf = tf.reduce_mean(tf.cast(tf.less(self._disc_logits_agent_tf, 0), tf.float32))
 
-        if (disc_weight_decay != 0):
+        if disc_weight_decay != 0:
             self._disc_loss_tf += disc_weight_decay * self._weight_decay_loss(self.MAIN_SCOPE + "/" + self.DISC_SCOPE)
 
-        if (disc_logit_reg_weight != 0):
+        if disc_logit_reg_weight != 0:
             self._disc_loss_tf += disc_logit_reg_weight * self._disc_logit_reg_loss()
 
-        if (disc_grad_penalty != 0):
+        if disc_grad_penalty != 0:
             self._grad_penalty_loss_tf = self._disc_grad_penalty_loss(in_tfs=self._disc_expert_inputs,
                                                                       out_tf=self._disc_logits_expert_tf)
             self._disc_loss_tf += disc_grad_penalty * self._grad_penalty_loss_tf
