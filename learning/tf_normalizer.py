@@ -3,6 +3,7 @@ import copy
 import tensorflow as tf
 from learning.normalizer import Normalizer
 
+
 class TFNormalizer(Normalizer):
 
     def __init__(self, sess, scope, size, groups_ids=None, eps=0.02, clip=np.inf):
@@ -14,7 +15,7 @@ class TFNormalizer(Normalizer):
             self._build_resource_tf()
         return
 
-    # initialze count when loading saved values so that things don't change to quickly during updates
+    # initialize count when loading saved values so that things don't change to quickly during updates
     def load(self):
         self.count = self.count_tf.eval()[0]
         self.mean = self.mean_tf.eval()
@@ -40,16 +41,19 @@ class TFNormalizer(Normalizer):
     def unnormalize_tf(self, norm_x):
         x = norm_x * self.std_tf + self.mean_tf
         return x
-    
+
     def _build_resource_tf(self):
-        self.count_tf = tf.get_variable(dtype=tf.int32, name='count', initializer=np.array([self.count], dtype=np.int32), trainable=False)
-        self.mean_tf = tf.get_variable(dtype=tf.float32, name='mean', initializer=self.mean.astype(np.float32), trainable=False)
-        self.std_tf = tf.get_variable(dtype=tf.float32, name='std', initializer=self.std.astype(np.float32), trainable=False)
-        
+        self.count_tf = tf.get_variable(dtype=tf.int32, name='count',
+                                        initializer=np.array([self.count], dtype=np.int32), trainable=False)
+        self.mean_tf = tf.get_variable(dtype=tf.float32, name='mean', initializer=self.mean.astype(np.float32),
+                                       trainable=False)
+        self.std_tf = tf.get_variable(dtype=tf.float32, name='std', initializer=self.std.astype(np.float32),
+                                      trainable=False)
+
         self.count_ph = tf.get_variable(dtype=tf.int32, name='count_ph', shape=[1])
         self.mean_ph = tf.get_variable(dtype=tf.float32, name='mean_ph', shape=self.mean.shape)
         self.std_ph = tf.get_variable(dtype=tf.float32, name='std_ph', shape=self.std.shape)
-        
+
         self._update_op = tf.group(
             self.count_tf.assign(self.count_ph),
             self.mean_tf.assign(self.mean_ph),
