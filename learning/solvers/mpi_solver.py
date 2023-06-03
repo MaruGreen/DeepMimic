@@ -1,22 +1,22 @@
+from abc import ABC
 from mpi4py import MPI
 import tensorflow as tf
 import numpy as np
+
 import learning.tf_util as TFUtil
 import util.math_util as MathUtil
 import util.mpi_util as MPIUtil
 from util.logger import Logger
 
-from learning.solvers.solver import Solver
 
-
-class MPISolver(Solver):
+class MPISolver(ABC):
     CHECK_SYNC_ITERS = 1000
 
     def __init__(self, sess, optimizer, variables):
-        super().__init__(variables)
+        self.vars = variables
         self.sess = sess
         self.optimizer = optimizer
-        self._build_grad_feed(variables)
+        self._build_grad_feed()
         self._update = optimizer.apply_gradients(zip(self._grad_tf_list, self.vars))
         self._set_flat_vars = TFUtil.SetFromFlat(sess, self.vars)
         self._get_flat_vars = TFUtil.GetFlat(sess, self.vars)
@@ -55,9 +55,9 @@ class MPISolver(Solver):
         return
 
     def sync(self):
-        vars = self._get_flat_vars()
-        MPIUtil.bcast(vars)
-        self._set_flat_vars(vars)
+        _vars = self._get_flat_vars()
+        MPIUtil.bcast(_vars)
+        self._set_flat_vars(_vars)
         return
 
     def check_synced(self):
@@ -75,7 +75,7 @@ class MPISolver(Solver):
     def _is_root(self):
         return MPIUtil.is_root_proc()
 
-    def _build_grad_feed(self, vars):
+    def _build_grad_feed(self):
         self._grad_tf_list = []
         self._grad_buffers = []
         for v in self.vars:
