@@ -8,14 +8,15 @@ from util.logger import Logger
 
 from learning.solvers.solver import Solver
 
+
 class MPISolver(Solver):
     CHECK_SYNC_ITERS = 1000
 
-    def __init__(self, sess, optimizer, vars):
-        super().__init__(vars)
+    def __init__(self, sess, optimizer, variables):
+        super().__init__(variables)
         self.sess = sess
         self.optimizer = optimizer
-        self._build_grad_feed(vars)
+        self._build_grad_feed(variables)
         self._update = optimizer.apply_gradients(zip(self._grad_tf_list, self.vars))
         self._set_flat_vars = TFUtil.SetFromFlat(sess, self.vars)
         self._get_flat_vars = TFUtil.GetFlat(sess, self.vars)
@@ -24,7 +25,7 @@ class MPISolver(Solver):
         grad_dim = self._calc_grad_dim()
         self._flat_grad = np.zeros(grad_dim, dtype=np.float32)
         self._global_flat_grad = np.zeros(grad_dim, dtype=np.float32)
-        
+
         return
 
     def get_stepsize(self):
@@ -40,7 +41,7 @@ class MPISolver(Solver):
     def update_flatgrad(self, flat_grad, grad_scale=1.0):
         if self.iter % self.CHECK_SYNC_ITERS == 0:
             assert self.check_synced(), Logger.print('Network parameters desynchronized')
-        
+
         if grad_scale != 1.0:
             flat_grad *= grad_scale
 
@@ -73,7 +74,7 @@ class MPISolver(Solver):
 
     def _is_root(self):
         return MPIUtil.is_root_proc()
-    
+
     def _build_grad_feed(self, vars):
         self._grad_tf_list = []
         self._grad_buffers = []
@@ -85,7 +86,7 @@ class MPISolver(Solver):
             self._grad_tf_list.append(grad_tf)
 
         self._grad_feed = dict({g_tf: g for g_tf, g in zip(self._grad_tf_list, self._grad_buffers)})
-        
+
         return
 
     def _calc_grad_dim(self):
