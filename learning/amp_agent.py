@@ -232,7 +232,7 @@ class AMPAgent(PPOAgent):
         path_id = super()._store_path(path)
 
         valid_path = (path_id != MathUtil.INVALID_IDX)
-        if (valid_path):
+        if valid_path:
             disc_expert_path_id = self._disc_expert_buffer.store(path.amp_obs_expert)
             assert (disc_expert_path_id != MathUtil.INVALID_IDX)
 
@@ -246,7 +246,7 @@ class AMPAgent(PPOAgent):
 
         super()._update_new_action()
 
-        if (not first_step):
+        if not first_step:
             self._record_amp_obs()
 
         return
@@ -330,7 +330,7 @@ class AMPAgent(PPOAgent):
         self.logger.log_tabular("Disc_Reward_Mean", disc_info["reward_mean"])
         self.logger.log_tabular("Disc_Reward_Std", disc_info["reward_std"])
 
-        if (self._enable_grad_penalty()):
+        if self._enable_grad_penalty():
             self.logger.log_tabular("Grad_Penalty", disc_info["grad_penalty"])
 
         return
@@ -357,7 +357,7 @@ class AMPAgent(PPOAgent):
 
             curr_info = self._step_disc(obs_expert=obs_expert, obs_agent=obs_agent)
 
-            if (info is None):
+            if info is None:
                 info = curr_info
             else:
                 for k, v in curr_info.items():
@@ -417,7 +417,7 @@ class AMPAgent(PPOAgent):
         self._disc_reward_mean = np.mean(valid_disc_r)
         self._disc_reward_std = np.std(valid_disc_r)
 
-        if (self._enable_amp_task_reward()):
+        if self._enable_amp_task_reward():
             task_r = self.replay_buffer.get("rewards", idx)
             r = self._lerp_reward(disc_r, task_r)
         else:
