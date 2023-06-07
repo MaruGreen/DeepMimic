@@ -1,6 +1,7 @@
 import numpy as np
 from env.env import Env
 
+
 class Path(object):
     def __init__(self):
         self.clear()
@@ -23,7 +24,7 @@ class Path(object):
 
     def check_vals(self):
         for vals in [self.states, self.goals, self.actions, self.logps,
-                  self.rewards]:
+                     self.rewards]:
             for v in vals:
                 if not np.isfinite(v).all():
                     return False
